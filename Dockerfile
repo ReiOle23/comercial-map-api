@@ -11,5 +11,5 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
 
 RUN pip install -r requirements.txt
 
+# Create project on first build
 # RUN django-admin startproject comercial_map_api . && mv comercial_map_api/* . && rmdir comercial_map_api
-# docker cp comercial_map_api:/app .
