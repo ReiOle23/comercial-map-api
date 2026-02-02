@@ -1,0 +1,20 @@
+services:
+  comercial-map-api:
+    build: .
+    container_name: comercial_map_api
+    ports:
+      - "58900:8000"
+    #command: uwsgi --ini uwsgi.ini
+    command: sleep infinity
+
+  comercial-map-api-postgres:
+    image: postgres:13.3
+    container_name: comercial_map_api_postgres
+    volumes:
+      - ./docker_data/postgresql:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
