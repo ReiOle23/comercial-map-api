@@ -96,12 +96,6 @@ DATABASES = {
         'PORT': os.environ.get('DATABASE_PORT', '5432'),
         'ATOMIC_REQUESTS': False,
         'CONN_MAX_AGE': 0,
-        'OPTIONS': {
-            'pool': {
-                'min_size': 2,
-                'max_size': 10,
-            }
-        },
     }
 }
 

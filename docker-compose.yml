@@ -10,6 +10,7 @@ services:
       - .env
     depends_on:
       - comercial-map-api-postgres
+      - comercial-map-api-redis
     # command: sleep infinity
     command: ["uvicorn", "asgi:application", "--workers", "4", "--host", "0.0.0.0", "--port", "8000"]
 
@@ -22,10 +23,9 @@ services:
       - POSTGRES_DB=comercial_map_api
       - POSTGRES_USER=comercial_map_api
       - POSTGRES_PASSWORD=comercial_map_api
-      - POSTGRES_INITDB_ARGS=-c max_connections=200
     ports:
       - "5432:5432"
-      
+
   comercial-map-api-redis:
     image: redis:7-alpine
     container_name: comercial_map_api_redis

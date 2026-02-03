@@ -14,8 +14,7 @@ asgiref==3.8.1
 uvicorn[standard]
 
 # Base de datos PostgreSQL
-psycopg2-binary==2.9.9
-psycopg[pool]==3.2.3
+psycopg[binary,pool]==3.2.3
 
 # Authentication
 djangorestframework-simplejwt==5.5.1
