@@ -10,8 +10,8 @@ services:
       - .env
     depends_on:
       - comercial-map-api-postgres
-    command: sleep infinity
-    # command: ["uvicorn", "comercial_map_api.asgi:application", "--workers", "4", "--host", "0.0.0.0", "--port", "8000"]
+    # command: sleep infinity
+    command: ["uvicorn", "asgi:application", "--workers", "4", "--host", "0.0.0.0", "--port", "8000"]
 
   comercial-map-api-postgres:
     image: postgres:13.3
