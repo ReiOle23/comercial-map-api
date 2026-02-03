@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,6 +85,7 @@ WSGI_APPLICATION = 'wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# Database connection pooling for async
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -92,6 +94,14 @@ DATABASES = {
         'PASSWORD': os.environ['DATABASE_PASSWORD'],
         'HOST': os.environ['DATABASE_HOST'],
         'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        'ATOMIC_REQUESTS': False,
+        'CONN_MAX_AGE': 0,
+        'OPTIONS': {
+            'pool': {
+                'min_size': 2,
+                'max_size': 10,
+            }
+        },
     }
 }
 
@@ -162,12 +172,27 @@ SWAGGER_SETTINGS = {
    }
 }
 
-from datetime import timedelta
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# Redis Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 50,
+                'retry_on_timeout': True,
+            },
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+        }
+    }
 }

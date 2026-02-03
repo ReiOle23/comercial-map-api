@@ -15,6 +15,14 @@ uvicorn[standard]
 
 # Base de datos PostgreSQL
 psycopg2-binary==2.9.9
+psycopg[pool]==3.2.3
 
 # Authentication
 djangorestframework-simplejwt==5.5.1
+
+# Async DRF
+adrf==0.1.7
+
+# Caching
+redis==5.2.1
+django-redis==5.4.0
