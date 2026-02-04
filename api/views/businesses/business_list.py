@@ -6,14 +6,24 @@ from asgiref.sync import sync_to_async
 from api.serializers.businesses import BusinessListSerializer
 from core.models import Business
 from django.db.models import F, ExpressionWrapper, FloatField, Value
+import math
 
 class BusinessListView(ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     
     @sync_to_async
-    def _get_businesses(self):
-        businesses = Business.objects.annotate(
+    def _get_businesses(self, lat, lon, radius):
+        lat_range = radius / 111000 
+        lon_range = radius / (111000 * math.cos(math.radians(lat)))
+
+        businesses = Business.objects.filter(
+            coordinates__lat__gte=lat - lat_range,
+            coordinates__lat__lte=lat + lat_range,
+            coordinates__lon__gte=lon - lon_range,
+            coordinates__lon__lte=lon + lon_range
+        )
+        businesses = businesses.annotate(
             metrics_score=ExpressionWrapper(
                 Value(0.2) * (F('rentability') / Value(100.0)) +
                 Value(0.4) * F('tipology') +
@@ -33,7 +43,7 @@ class BusinessListView(ViewSet):
             raise ValueError("Missing required parameters: lat, lon, radius")
 
         # Get from database        
-        data = await self._get_businesses()
+        data = await self._get_businesses(float(lat), float(lon), int(radius))
         
         return Response(data, status=status.HTTP_200_OK)
     

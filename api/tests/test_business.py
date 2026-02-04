@@ -69,6 +69,7 @@ class TestBusinessLoad:
         for business in response.json():
             assert 'metrics_score' in business
             assert business['metrics_score'] <= first_metrics
+            first_metrics = business['metrics_score']
             
         
     @pytest.mark.skip(reason="Skipping due to database connection issues")
