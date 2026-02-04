@@ -22,3 +22,14 @@ class Business(models.Model):
     def __str__(self):
         return '%s' % self.name
     
+class IaeCode(models.Model):
+    
+    class meta:
+        verbose_name = _('iae_code')
+        verbose_name_plural = _('iae_codes')
+        
+    code = models.CharField(max_length=50)
+    value = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(1000)])
+    
+    def __str__(self):
+        return '%s' % self.code

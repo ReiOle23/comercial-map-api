@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from api.views.businesses.business_list import BusinessListView
+from api.views.businesses.iae_crud import IaeView, IaeDetailView
 
 urlpatterns = [
     path('users/', UserListView.as_view(), name='users'),
@@ -16,6 +17,9 @@ urlpatterns = [
     
     # GET /businesses?lat=41.38879&lon=2.15899&radius=5000
     path('businesses/', BusinessListView.as_view({'get': 'list'}), name='businesses'),
+    
+    path('iaecodes/', IaeView.as_view(), name='iaecodes'),
+    path('iaecodes/<int:pk>/', IaeDetailView.as_view(), name='iaecode_detail'),
     
     
 #     1. Dado un punto de coordenadas: latitud y longitud y un radio máximo de ataque (en metros),
