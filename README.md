@@ -1,6 +1,19 @@
 # comercial-map-api
-A comercial map api to get company leads
+A comercial map api to get company leads by params
 
+To start app:
+```bash
+# Build the app
+docker-compose build
 
-- docker exec -it comercial_map_api bash
-- uvicorn comercial_map_api.asgi:application --workers 4 --host 0.0.0.0 --port 8000
+# Run the app
+docker-compose up
+```
+
+The app will be available at `http://localhost:58900`
+
+To run tests:
+```bash
+# test 1000 request may fail sometimes due to database connection limits
+docker exec -it comercial_map_api pytest
+```
