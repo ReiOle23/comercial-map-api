@@ -15,7 +15,7 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='user_detail'),
     
     # GET /businesses?lat=41.38879&lon=2.15899&radius=5000
-    path('businesses/', BusinessListView.as_view(), name='businesses'),
+    path('businesses/', BusinessListView.as_view({'get': 'list'}), name='businesses'),
     
     
 #     1. Dado un punto de coordenadas: latitud y longitud y un radio máximo de ataque (en metros),

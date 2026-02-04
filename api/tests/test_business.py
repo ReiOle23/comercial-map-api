@@ -6,6 +6,7 @@ from core.models import Business
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+import time,asyncio
 
 User = get_user_model()
 
@@ -47,4 +48,26 @@ class TestBusinessLoad:
         response = await sync_to_async(client.get)(self.businesses_url)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 20
+        
+    @pytest.mark.asyncio
+    async def test_get_businesses_1000_request_at_once(self):
+        """Test 1000 concurrent requests should complete in under 1 second"""
+        start_time = time.time()
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.auth_token}')
+        
+        async def make_request():
+            response = await sync_to_async(client.get)(self.businesses_url)
+            assert response.status_code == status.HTTP_200_OK
+            return response
+        
+        # Run 1000 requests concurrently
+        tasks = [make_request() for _ in range(1000)]
+        await asyncio.gather(*tasks)
+        
+        end_time = time.time()
+        total_time = end_time - start_time
+        
+        # Assert all requests completed in under 1 second
+        assert total_time < 1.0, f"Too slow: {total_time:.3f}s"
         
