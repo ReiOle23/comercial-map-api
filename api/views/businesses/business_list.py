@@ -5,6 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from asgiref.sync import sync_to_async
 from api.serializers.businesses import BusinessListSerializer
 from core.models import Business
+from django.db.models import F, ExpressionWrapper, FloatField, Value
 
 class BusinessListView(ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -12,14 +13,26 @@ class BusinessListView(ViewSet):
     
     @sync_to_async
     def _get_businesses(self):
-        businesses = Business.objects.all()
+        businesses = Business.objects.annotate(
+            metrics_score=ExpressionWrapper(
+                Value(0.2) * (F('rentability') / Value(100.0)) +
+                Value(0.4) * F('tipology') +
+                Value(0.4) * (Value(1.0) / (Value(1) + F('proximity_to_urban_center_m'))),
+                output_field=FloatField()
+            )
+        ).order_by('-metrics_score')
         serializer = BusinessListSerializer(businesses, many=True)
         return serializer.data
         
     async def list(self, request):
         """List all businesses"""
-        # Get from database
-       
+        lat = request.GET.get('lat')
+        lon = request.GET.get('lon')
+        radius = request.GET.get('radius')
+        if not lat or not lon or not radius:
+            raise ValueError("Missing required parameters: lat, lon, radius")
+
+        # Get from database        
         data = await self._get_businesses()
         
         return Response(data, status=status.HTTP_200_OK)
