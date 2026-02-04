@@ -6,6 +6,7 @@ from asgiref.sync import sync_to_async
 from api.serializers.businesses import BusinessListSerializer
 from core.models import Business
 from django.db.models import F, ExpressionWrapper, FloatField, Value
+from django.core.cache import cache
 import math
 
 class BusinessListView(ViewSet):
@@ -49,8 +50,11 @@ class BusinessListView(ViewSet):
         if not lat or not lon or not radius:
             raise ValueError("Missing required parameters: lat, lon, radius")
 
-        # Get from database        
-        data = await self._get_businesses(iae_code, float(lat), float(lon), int(radius))
-        
-        return Response(data, status=status.HTTP_200_OK)
-    
+        cache_key = f"business_{lat}_{lon}_{radius}_{iae_code or 0}"
+        result = cache.get(cache_key)
+        if result is None:
+            # Get from database        
+            result = await self._get_businesses(iae_code, float(lat), float(lon), int(radius))
+            cache.set(cache_key, result, timeout=60) # Cache por 1 minuto
+
+        return Response(result, status=status.HTTP_200_OK)

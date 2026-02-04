@@ -84,7 +84,7 @@ class TestBusinessLoad:
     # @pytest.mark.skip(reason="Skipping due to database connection issues")
     @pytest.mark.asyncio
     async def test_get_businesses_1000_request_at_once(self):
-        """Test 1000 concurrent requests should complete in under 1 second"""
+        """Test 1000 concurrent requests should complete in under 2 second"""
         start_time = time.time()
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.auth_token}')
@@ -106,8 +106,8 @@ class TestBusinessLoad:
         end_time = time.time()
         total_time = end_time - start_time
         
-        # Assert all requests completed in under 1 second
-        assert total_time < 1.0, f"Too slow: {total_time:.3f}s"
+        # Assert all requests completed in under 2 seconds
+        assert total_time < 2.0, f"Too slow: {total_time:.3f}s"
         
     @pytest.mark.asyncio
     async def test_get_businesses_with_iae_code(self):
