@@ -13,16 +13,22 @@ class BusinessListView(ViewSet):
     authentication_classes = [JWTAuthentication]
     
     @sync_to_async
-    def _get_businesses(self, lat, lon, radius):
+    def _get_businesses(self, iae_code, lat, lon, radius):
         lat_range = radius / 111000 
         lon_range = radius / (111000 * math.cos(math.radians(lat)))
-
+        
         businesses = Business.objects.filter(
             coordinates__lat__gte=lat - lat_range,
             coordinates__lat__lte=lat + lat_range,
             coordinates__lon__gte=lon - lon_range,
             coordinates__lon__lte=lon + lon_range
         )
+        
+        if iae_code:
+            businesses = businesses.filter(
+                iae_code__contains=iae_code[0:2],
+            )
+            
         businesses = businesses.annotate(
             metrics_score=ExpressionWrapper(
                 Value(0.2) * (F('rentability') / Value(100.0)) +
@@ -36,6 +42,7 @@ class BusinessListView(ViewSet):
         
     async def list(self, request):
         """List all businesses"""
+        iae_code = request.GET.get('iae_code')
         lat = request.GET.get('lat')
         lon = request.GET.get('lon')
         radius = request.GET.get('radius')
@@ -43,7 +50,7 @@ class BusinessListView(ViewSet):
             raise ValueError("Missing required parameters: lat, lon, radius")
 
         # Get from database        
-        data = await self._get_businesses(float(lat), float(lon), int(radius))
+        data = await self._get_businesses(iae_code, float(lat), float(lon), int(radius))
         
         return Response(data, status=status.HTTP_200_OK)
     

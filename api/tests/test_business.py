@@ -17,10 +17,19 @@ class TestBusinessLoad:
     def setup(self, db):
         """Setup test data"""
         # Create businesses
-        for i in range(20):
+        for i in range(17):
             Business.objects.create(
                 name=f'Business {i}',
                 iae_code='56101',
+                rentability=70 + i,
+                proximity_to_urban_center_m=1000 + i * 100,
+                coordinates={'lat': 41.38879 + i * 0.001, 'lon': 2.15899 + i * 0.001}
+            )
+            
+        for i in range(3):
+            Business.objects.create(
+                name=f'Business {i}',
+                iae_code='E5348',
                 rentability=70 + i,
                 proximity_to_urban_center_m=1000 + i * 100,
                 coordinates={'lat': 41.38879 + i * 0.001, 'lon': 2.15899 + i * 0.001}
@@ -72,7 +81,7 @@ class TestBusinessLoad:
             first_metrics = business['metrics_score']
             
         
-    @pytest.mark.skip(reason="Skipping due to database connection issues")
+    # @pytest.mark.skip(reason="Skipping due to database connection issues")
     @pytest.mark.asyncio
     async def test_get_businesses_1000_request_at_once(self):
         """Test 1000 concurrent requests should complete in under 1 second"""
@@ -100,3 +109,31 @@ class TestBusinessLoad:
         # Assert all requests completed in under 1 second
         assert total_time < 1.0, f"Too slow: {total_time:.3f}s"
         
+    @pytest.mark.asyncio
+    async def test_get_businesses_with_iae_code(self):
+        """Test getting businesses with IAE code filter"""
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.auth_token}')
+        params = {
+            'lat': 41.38879,
+            'lon': 2.15899,
+            'radius': 5000,
+            'iae_code': 'E5348'
+        }
+        response = await sync_to_async(client.get)(self.businesses_url, data=params)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 3
+        
+    @pytest.mark.asyncio
+    async def test_get_businesses_latency(self):
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.auth_token}')
+        
+        params = {'lat': 41.38879, 'lon': 2.15899, 'radius': 5000}
+    
+        start_time = time.time()    
+        response = await sync_to_async(client.get)(self.businesses_url, data=params)
+        end_time = time.time()
+        
+        latency = end_time - start_time
+        assert latency < 1
